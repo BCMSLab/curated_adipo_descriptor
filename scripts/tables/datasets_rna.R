@@ -16,7 +16,7 @@ phenotype_data <- colData(adipo_counts)
 phenotype_data %>%
   as.data.frame() %>%
   group_by(study_name) %>%
-  summarise(pmid = unique(pmid),
+  summarise(pmid = as.character(unique(pmid)),
             nsamples = n(),
             time = paste(unique(time), collapse = '/'),
             stages = paste(unique(stage), collapse = '/'),

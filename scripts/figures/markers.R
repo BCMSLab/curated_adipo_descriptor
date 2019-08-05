@@ -75,14 +75,14 @@ pushViewport(viewport(layout.pos.col = 1,
                       layout.pos.row = 1))
 grid.text("A", x = .02, y = .97)
 
-draw(hm1, newpage = FALSE)
+draw(hm1, newpage = FALSE, padding = unit(rep(.5, 4), 'cm'))
 
 upViewport()
 
 pushViewport(viewport(layout.pos.col = 2,
                       layout.pos.row = 1))
 grid.text("B", x = 0, y = .97)
-draw(hm2, newpage = FALSE)
+draw(hm2, newpage = FALSE, padding = unit(rep(.5, 4), 'cm'))
 upViewport()
 
 dev.off()

@@ -39,7 +39,8 @@ figures: ## Generate the figures
 figures: dir_manuscript \
 	dir_logs \
 	$(FIG_DIR)/mds.png \
-	$(FIG_DIR)/markers.png
+	$(FIG_DIR)/markers.png \
+	$(FIG_DIR)/replicates_similarity.png
 	
 tables: ## Generate the tables
 tables: dir_manuscript \
@@ -61,6 +62,10 @@ $(FIG_DIR)/go_enrichment.png: $(FIG_SRC)/go_enrichment.R \
 	$(DATA)/adipo_counts.rds \
 	$(DATA)/peak_counts.rds
 	$(RFIG)
+$(FIG_DIR)/replicates_similarity.png: $(FIG_SRC)/replicates_similarity.R \
+	$(DATA)/adipo_counts.rds \
+	$(DATA)/peak_counts.rds
+	$(RFIG)	
 	
 # Tables
 $(TAB_DIR)/datasets_rna.tex: $(TAB_SRC)/datasets_rna.R \
