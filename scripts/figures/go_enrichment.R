@@ -50,9 +50,11 @@ deg_go_res <- map(deg, function(y) {
 
 p1 <- deg_go_res %>%
   filter(category %in% c('GO:0060612', 'GO:0019915', 'GO:0032869')) %>%
-  mutate(fraction = numDEInCat/numInCat) %>%
+  mutate(fraction = numDEInCat/numInCat,
+         label = ifelse(over_represented_pvalue < .05, '*', '')) %>%
   ggplot(aes(x = category, y = fraction)) +
   geom_col() +
+  geom_text(aes(x = category, y = fraction + .05, label = label)) +
   lims(y = c(0, 1)) +
   facet_wrap(~contrast, nrow = 1) +
   theme_bw() +
@@ -94,12 +96,20 @@ gene_go_res <- tibble(gene = as.character(mcols(peak_counts)$geneId),
   right_join(res) %>%
   na.omit()
 
+factor_labels <- c('CEBPB (Stage 1 vs 0)', 'PPARG (Stage 3 vs 0)')
+names(factor_labels) <- c('CEBPB', 'PPARG')
+
+set.seed(1223)
+random_res <- gene_go_res[sample(1:nrow(gene_go_res), 50),]
+random_res$cat <- '(Random Set)'
+
 p2 <- gene_go_res %>%
   filter(cat %in% c('GO:0060612', 'GO:0019915', 'GO:0032869'),
          padj < .2) %>%
+  rbind(random_res) %>%
   ggplot(aes(x = cat, y = abs(log2FoldChange))) +
   geom_boxplot() +
-  facet_wrap(~factor) +
+  facet_wrap(~factor, labeller = labeller(factor = factor_labels)) +
   theme_bw() +
   labs(x = '', y = 'Absolute fold-change (Log2)') +
   theme(panel.grid = element_blank(),

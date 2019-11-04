@@ -7,11 +7,9 @@ library(circlize)
 
 # loading data
 adipo_count <- read_rds('data/adipo_counts.rds')
-pd <- tibble(time = adipo_count$time,
-             stage = adipo_count$stage,
-             study = adipo_count$study)
+se <- adipo_count[, order(adipo_count$time)]
 
-dds <- DESeqDataSet(adipo_count,design = ~stage)
+dds <- DESeqDataSet(se,design = ~stage)
 dds_transform <- vst(dds)
 mat <- assay(dds_transform)
 
@@ -20,19 +18,31 @@ markers <- list('Adipogenic' = c('Pparg', 'Cebpb', 'Cebpa'),
 
 col_fun <- colorRamp2(c(0, 20), c('white', 'darkblue'))
 
-ind <- rownames(mat) %in% unlist(markers)
+ra <- rowAnnotation(Factor1 = anno_mark(at = which(!duplicated(se$time)),
+                                        labels = unique(se$time)))
+ca <- columnAnnotation(Factor2 = anno_mark(at = which(!duplicated(se$time)),
+                                           labels = unique(se$time)))
+
+ind <- which(rownames(mat) %in% unlist(markers))
+fac <- ifelse(rownames(mat)[ind] %in% markers$Adipogenic,
+              'Adipogenic',
+              'Lipogenic')
+
 hm1 <- Heatmap(mat[ind,],
+        cluster_rows = FALSE, 
         cluster_columns = FALSE,
-        cluster_rows = FALSE,
-        column_split = dds_transform$stage,
         show_column_names = FALSE,
-        show_heatmap_legend = FALSE)
+        show_heatmap_legend = FALSE,
+        top_annotation = ca,
+        column_split = se$stage,
+        row_split = fac)
 
 # chip
 peak_counts <- read_rds('data/peak_counts.rds')
 
 # select samples for the factor
-sample_ind <- (peak_counts$factor %in% c('CEBPB', 'PPARG')) & (!is.na(peak_counts$factor))
+sample_ind <- (peak_counts$factor %in% c('CEBPB', 'PPARG')) & (!is.na(peak_counts$factor) & (!is.na(peak_counts$time)))
+sum(sample_ind)
 sample_ids <- colnames(peak_counts)[sample_ind]
 
 # select peaks from the selected samples
@@ -41,16 +51,17 @@ peak_ind <- unlist(peak_ind) > 2
 
 # subset the object
 se <- peak_counts[peak_ind, sample_ind]
-#se$factor <- ifelse(is.na(se$factor), 'Input', se$factor)
-
-pd_chip <- tibble(time = se$time,
-                  stage = se$stage,
-                  study = se$study,
-                  factor = se$factor)
+se <- se[, order(se$factor, se$time)]
 
 dds_chip <- DESeqDataSet(se,design = ~factor)
 dds_chip_transform <- vst(dds_chip)
 mat_chip <- assay(dds_chip_transform)
+se$factor_time <- paste0(se$time, se$factor)
+
+se$time_label <- ifelse(is.na(se$time), 'NA', se$time)
+
+ca <- columnAnnotation(Factor2 = anno_mark(at = which(!duplicated(se$factor_time)),
+                                           labels = c(unique(se$time[se$factor == 'CEBPB']), unique(se$time[se$factor == 'PPARG']))))
 
 targets <- c('Acly', 'Fasn', 'Lpl')
 ind <- mcols(dds_chip)$geneId %in% targets
@@ -62,12 +73,13 @@ hm2 <- Heatmap(mat_chip[ind,],
         cluster_columns = FALSE,
         cluster_column_slices = FALSE,
         cluster_rows = FALSE,
-        column_split = dds_chip$factor,
         show_column_names = FALSE,
+        top_annotation = ca,
+        column_split = dds_chip$factor,
         show_heatmap_legend = FALSE)
 
 png(filename = 'manuscript/figures/markers.png',
-    width = 18, height = 9, units = 'cm', res = 300)
+    width = 20, height = 9, units = 'cm', res = 300)
 
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(1, 2)))

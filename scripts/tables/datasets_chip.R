@@ -29,7 +29,7 @@ phenotype_data %>%
             stages = paste(unique(stage), collapse = '/'),
             factor = paste(unique(factor), collapse = '/ '),
             reference = paste0('\\cite{', unique(bibtexkey), '}')) %>%
-  setNames(c(c('GEO ID', 'PMID', '(N)',
+  setNames(c(c('SRA ID', 'PMID', '(N)',
                'Time (hr)', 'Stage', 'Factor', 'Ref.'))) %>%
   xtable(align = 'cllcccp{.2\\textwidth}c') %>%
   print(floating = FALSE,

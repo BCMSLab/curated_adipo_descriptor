@@ -32,7 +32,7 @@ hm1 <- Heatmap(d,
 peak_counts <- read_rds('data/peak_counts.rds')
 
 # select samples for the factor
-sample_ind <- (peak_counts$factor %in% c('CEBPB', 'PPARG')) & (!is.na(peak_counts$factor))
+sample_ind <- (peak_counts$factor %in% c('CEBPB', 'PPARG')) & (!is.na(peak_counts$factor) & (!is.na(peak_counts$time)))
 sample_ids <- colnames(peak_counts)[sample_ind]
 
 # select peaks from the selected samples
@@ -49,11 +49,14 @@ dds_chip_transform <- vst(dds_chip)
 
 d_chip <- as.matrix(dist(t(assay(dds_chip_transform))))
 
-ra <- rowAnnotation(Factor1 = anno_mark(at = which(!duplicated(se_chip$time)),
-                                        labels = unique(se_chip$time)))
-ca <- columnAnnotation(Factor2 = anno_mark(at = which(!duplicated(se_chip$time)),
-                                           labels = unique(se_chip$time)))
+se_chip$factor_time <- paste0(se_chip$time, se_chip$factor)
 
+se_chip$time_label <- ifelse(is.na(se_chip$time), 'NA', se_chip$time)
+
+ca <- columnAnnotation(Factor2 = anno_mark(at = which(!duplicated(se_chip$factor_time)),
+                                           labels = c(unique(se_chip$time[se_chip$factor == 'CEBPB']), unique(se_chip$time[se_chip$factor == 'PPARG']))))
+ra <- rowAnnotation(Factor1 = anno_mark(at = which(!duplicated(se_chip$factor_time)),
+                                        labels = c(unique(se_chip$time[se_chip$factor == 'CEBPB']), unique(se_chip$time[se_chip$factor == 'PPARG']))))
 hm2 <- Heatmap(d_chip,
         cluster_rows = FALSE, 
         cluster_columns = FALSE,
