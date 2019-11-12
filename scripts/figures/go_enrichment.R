@@ -48,8 +48,10 @@ deg_go_res <- map(deg, function(y) {
   bind_rows(.id = 'contrast') %>%
   as_tibble() 
 
+go <- c('GO:0060612', 'GO:0019915', 'GO:0032869', 'GO:0016042', 'GO:0006006')
+
 p1 <- deg_go_res %>%
-  filter(category %in% c('GO:0060612', 'GO:0019915', 'GO:0032869')) %>%
+  filter(category %in% go) %>%
   mutate(fraction = numDEInCat/numInCat,
          label = ifelse(over_represented_pvalue < .05, '*', '')) %>%
   ggplot(aes(x = category, y = fraction)) +
@@ -104,7 +106,7 @@ random_res <- gene_go_res[sample(1:nrow(gene_go_res), 50),]
 random_res$cat <- '(Random Set)'
 
 p2 <- gene_go_res %>%
-  filter(cat %in% c('GO:0060612', 'GO:0019915', 'GO:0032869'),
+  filter(cat %in% go,
          padj < .2) %>%
   rbind(random_res) %>%
   ggplot(aes(x = cat, y = abs(log2FoldChange))) +

@@ -21,7 +21,7 @@ RTAB=R CMD BATCH --vanilla $< $(LOG_TAB)/$(<F).Rout
 
 # All
 all: ## Run all parts of the makefile
-all: figures tables clean
+all: data figures tables clean
 
 # Directories
 dir_manuscript: ## Make manuscript directory tree
@@ -34,13 +34,21 @@ dir_logs:
 	test ! -d $(LOG) && mkdir $(LOG) || exit 0
 	test ! -d $(LOG_FIG) && mkdir $(LOG_FIG) || exit 0
 	test ! -d $(LOG_TAB) && mkdir $(LOG_TAB) || exit 0
+
+data: ## Download the processed data
+data: 
+	wget -c -O data.zip https://ndownloader.figshare.com/articles/10282718/versions/1
+	unzip -n data.zip -d $(DATA)
+	tar --skip-old-files -xf data/bws.tar.gz
 	
 figures: ## Generate the figures
 figures: dir_manuscript \
 	dir_logs \
 	$(FIG_DIR)/mds.png \
 	$(FIG_DIR)/markers.png \
-	$(FIG_DIR)/replicates_similarity.png
+	$(FIG_DIR)/replicates_similarity.png \
+	$(FIG_DIR)/primary_adipocytes.png \
+	$(FIG_DIR)/hm_coverage.png
 	
 tables: ## Generate the tables
 tables: dir_manuscript \
@@ -65,6 +73,14 @@ $(FIG_DIR)/go_enrichment.png: $(FIG_SRC)/go_enrichment.R \
 $(FIG_DIR)/replicates_similarity.png: $(FIG_SRC)/replicates_similarity.R \
 	$(DATA)/adipo_counts.rds \
 	$(DATA)/peak_counts.rds
+	$(RFIG)	
+$(FIG_DIR)/primary_adipocytes.png: $(FIG_SRC)/primary_adipocytes.R \
+	$(DATA)/primary_adipocyte.rds \
+	$(DATA)/primary_adipocyte_chip.rds
+	$(RFIG)	
+$(FIG_DIR)/hm_coverage.png: $(FIG_SRC)/hm_coverage.R \
+	$(DATA)/peak_counts.rds \
+	$(DATA)/bws.tar.gz
 	$(RFIG)	
 	
 # Tables
