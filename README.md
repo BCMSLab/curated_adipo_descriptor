@@ -25,15 +25,15 @@ this manuscript. Another public repository
 contains the scripts to download, prepare and analyze the data.
 
 ```bash
-$ git clone http://github.com/BCMSLab/auto_adipo_diff
+$ git clone https://github.com/BCMSLab/curated_adipo_descriptor
 ```
 
 ## Runing the analysis
 
-In the directory `auto_adipo_diff`, run `make`
+In the directory `curated_adipo_descriptor`, run `make`
 
 ```bash
-$ cd auto_adipo_diff
+$ cd curated_adipo_descriptor
 $ make all
 ```
 
